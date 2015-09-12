@@ -1,0 +1,106 @@
+
+.status(@color, @content) {
+	color: @color;
+	&:before { font-family: 'Glyphicons Halflings'; content: @content; }
+}
+.statusSuccess { .status(green, "\e013") }
+.statusError { .status(red, "\e014") }
+
+
+body { padding-top: 70px; background-color: #fbfcfe; }
+.navbar-default { background-color: #3264c8; }
+.navbar-default .row { margin-bottom: 0; }
+.navbar-default a { color: white !important; }
+.navbar-brand { margin: 0px 20px; font-size: 2em; font-weight: bold; cursor: default; }
+.navbar-brand small { margin-left: 10px; font-weight: normal; font-style: italic; }
+#github-buttons {
+	padding-top: 10px;
+	float: right;
+}
+
+.row { margin-bottom: 10px; }
+
+.panel-body { min-height: 400px; }
+.panel-heading { background-color: #f0f0ff !important; }
+.panel-title {
+	button {
+		margin-top: -6px;
+		margin-left: 5px;
+	}
+	.dropdown {
+		margin-left: 15px;
+	}
+}
+.panel-subsection {
+	font-weight: bold;
+	font-style: italic;
+	margin: 10px 0 0 0;
+}
+
+#method-selector input {
+	display: none;
+}
+
+table {
+	margin-bottom: 0;
+	tr > td {
+		&:nth-child(1) { width: 30px; text-align: center; }
+		&:nth-child(2) { width: 150px; }
+	}
+}
+
+.response-empty, .response-loading {
+	margin-top: 50px;
+	text-align: center;
+}
+
+#response-status {
+	&, span { margin-left: 10px; }
+	#response-status-code { font-weight: bold; }
+	&.success { .statusSuccess }
+	&.error { .statusError }
+}
+
+a[req] { cursor: pointer; }
+
+
+
+.dropdown-header {
+	font-style: italic;
+	color: #aaa;
+}
+
+.dropdown-menu.two-column {
+	min-width: 400px;
+	
+	.first-column { padding-right: 0; }
+	.second-column { padding-left: 0; border-left: 1px solid lightgray; }
+	
+	ul {
+		list-style: none;
+		padding: 0;
+		
+		li a {
+			display: block;
+			padding: 3px 20px;
+			clear: both;
+			font-weight: 400;
+			line-height: 1.428571429;
+			color: #333;
+			white-space: normal;
+			
+			&:hover {
+				text-decoration: none;
+				color: #262626;
+				background-color: #f5f5f5;
+			}
+		}
+	}
+}
+ 
+@media (max-width: 767px) {
+	.dropdown-menu.two-column {
+		min-width: 240px !important;
+		overflow-x: hidden;
+	}
+}

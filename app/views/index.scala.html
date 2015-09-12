@@ -1,0 +1,187 @@
+@(dateString: String)
+
+@rowHeader(id: String, key: String, value: String = "") = {
+	<tr>
+		<td><input id="checkbox-@id" type="checkbox" @("checked".when(value!=""))></td>
+		<td class="key">@key</td>
+		<td><input id="@id" type="text" class="form-control input-sm" value="@value"></td>
+	</tr>
+}
+
+@main("API Tester") {
+	<nav class="navbar navbar-default navbar-fixed-top">
+	  <div class="container">
+			<div class="row">
+				<div class="col-md-6">
+			    <div class="navbar-header">
+			      <a class="navbar-brand">Play-Api-Rest <small>API Tester</small></a>
+			    </div>
+				</div>
+				<div class="col-md-6">
+					<div id="github-buttons">
+						<iframe src="http://ghbtns.com/github-btn.html?user=adrianhurt&repo=play-api-rest-seed&type=watch&count=true&size=large"
+							allowtransparency="true" frameborder="0" scrolling="0" width="160" height="30"></iframe>
+						<iframe src="http://ghbtns.com/github-btn.html?user=adrianhurt&repo=play-api-rest-seed&type=fork&count=true&size=large"
+							allowtransparency="true" frameborder="0" scrolling="0" width="156" height="30"></iframe>
+					</div>
+				</div>
+			</div>
+	  </div>
+	</nav>
+	
+	<div class="row">
+		<div class="col-md-6">
+			<div class="panel panel-default">
+			  <div class="panel-heading">
+					<h3 class="panel-title">
+						<span>Request</span>
+						<div class="dropdown pull-right">
+						  <button class="btn btn-default btn-sm dropdown-toggle" type="button" id="select-test" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						    Select a test
+						    <span class="caret"></span>
+						  </button>
+						  <ul id="test-list" class="dropdown-menu two-column" aria-labelledby="select-test">
+								<div class="row">
+									<div class="first-column col-sm-6">
+										<ul>
+											<li class="dropdown-header">Basics</li>
+									    <li><a req="test">Test</a></li>
+									    <li><a req="usernames">Usernames</a></li>
+											<li role="separator" class="divider"></li>
+		
+											<li class="dropdown-header">Authentication</li>
+									    <li><a req="signin">Sign in</a></li>
+									    <li><a req="signout">Sign out</a></li>
+									    <li><a req="signup">Sign up</a></li>
+											<li role="separator" class="divider"></li>
+		
+											<li class="dropdown-header">Account</li>
+									    <li><a req="account">Account info</a></li>
+									    <li><a req="account-update">Account update</a></li>
+									    <li><a req="account-update-password">Account update password</a></li>
+									    <li><a req="account-delete">Account delete</a></li>
+										</ul>
+									</div>
+									<div class="second-column col-sm-6">
+										<ul>
+											<li class="dropdown-header">Folders</li>
+									    <li><a req="folders">Folders</a></li>
+									    <li><a req="folder-new">New folder</a></li>
+									    <li><a req="folder">Folder info</a></li>
+									    <li><a req="folder-update">Folder update</a></li>
+									    <li><a req="folder-update-order">Folder update order</a></li>
+									    <li><a req="folder-delete">Folder delete</a></li>
+											<li role="separator" class="divider"></li>
+		
+											<li class="dropdown-header">Tasks</li>
+									    <li><a req="tasks-filtering-sorting">Tasks - filtering & sorting</a></li>
+									    <li><a req="tasks-searching">Tasks - searching</a></li>
+									    <li><a req="task-new">New task</a></li>
+									    <li><a req="task">Task info</a></li>
+									    <li><a req="task-update">Task update</a></li>
+									    <li><a req="task-update-order">Task update order</a></li>
+									    <li><a req="task-update-folder">Task update folder</a></li>
+									    <li><a req="task-update-done">Task mark as done</a></li>
+									    <li><a req="task-update-undone">Task unmark as done</a></li>
+									    <li><a req="task-delete">Task delete</a></li>
+										</ul>
+									</div>
+								</div>
+						  </ul>
+						</div>
+
+						<button id="signout" class="btn btn-default btn-sm pull-right" type="button" data-loading-text="Loading...">Sign out</button>
+						<button id="signin" class="btn btn-default btn-sm pull-right" type="button" data-loading-text="Loading...">Sign in</button>
+					</h3>
+				</div>
+			  <div class="panel-body">
+					<div class="row">
+						<div class="col-md-12">
+							<input id="request" type="text" class="form-control" value="test" placeholder="test">
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-8">
+							<div class="form-inline">
+								<div id="method-selector" class="btn-group">
+								  <label method="GET" class="btn btn-default active">GET</label>
+								  <label method="POST" class="btn btn-default">POST</label>
+								  <label method="PUT" class="btn btn-default">PUT</label>
+								  <label method="PATCH" class="btn btn-default">PATCH</label>
+								  <label method="DELETE" class="btn btn-default">DELETE</label>
+								</div>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<button id="test-button" type="button" class="btn btn-primary pull-right">Test request!</button>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-8">
+					    <p class="panel-subsection">API URL</p>
+							<input id="apiurl" type="text" class="form-control input-sm" value="http://localhost:9000" placeholder="http://localhost:9000">
+						</div>
+						<div class="col-md-4">
+					    <p class="panel-subsection">Enveloped request</p>
+							<input id="enveloped" type="checkbox"> Enveloped
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<form id="form-headers">
+								<button type="reset" class="btn btn-link btn-xs pull-right">Set default headers</button>
+								<p class="panel-subsection">Headers</p>
+								<table id="request-headers" class="table table-bordered table-condensed">
+									<tbody>
+										@rowHeader("contentType", "Content-Type", "application/json")
+										@rowHeader("lang", "Accept-Language", "en")
+										@rowHeader("date", "Date", dateString)
+										@rowHeader("apikey", "X-Api-Key", "AbCdEfGhIjK1")
+										@rowHeader("token", "X-Auth-Token")
+									</tbody>
+								</table>
+							</form>
+						</div>
+					</div>
+					<div id="request-body-section" class="row hidden">
+						<div class="col-md-12">
+					    <p class="panel-subsection">Body (JSON)</p>
+							<textarea id="request-body" class="form-control" rows="20"></textarea>
+						</div>
+					</div>
+			  </div>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="panel panel-default">
+			  <div class="panel-heading"><h3 class="panel-title">Response</h3></div>
+			  <div class="panel-body">
+					<div class="response-empty">
+						<p>Make a request to see here the response</p>
+					</div>
+					<div class="response-loading hidden">
+						<p>Waiting for the response...</p>
+						<div class="row">
+							<div class="col-md-6 col-md-offset-3">
+								<div class="progress">
+									<div class="progress-bar progress-bar-striped active" role="progressbar" style="width: 100%"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="response hidden">
+				    <span class="panel-subsection">Status:</span>
+						<span id="response-status">
+							<span id="response-status-code"></span>
+							<span id="response-status-text"></span>
+						</span>
+				    <p class="panel-subsection">Headers</p>
+						<div id="response-headers" class="well well-sm">&nbsp;</div>
+				    <p class="panel-subsection">Body</p>
+						<div id="response-body" class="well well-sm">&nbsp;</div>
+					</div>
+			  </div>
+			</div>
+		</div>
+	</div>
+}
