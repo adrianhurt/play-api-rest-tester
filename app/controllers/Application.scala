@@ -64,6 +64,9 @@ class Application extends Controller {
             case s if s > 400 && s < 500 => BadRequest(js)
             case 500 => InternalServerError(js)
           }).withHeaders(response.allHeaders.map(h => (h._1, h._2.mkString(","))).toSeq: _*)
+        } recover {
+          case e: Throwable => InternalServerError(JsString("Tester Error: " + e.getMessage()))
+          case _ => InternalServerError(JsString("Tester Error: unknown error"))
         }
       }
     )
