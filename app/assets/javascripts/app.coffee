@@ -72,7 +72,7 @@ define ['jquery', 'bootstrap'], ($, bootstrap) ->
 			when 'test' then set 'GET', 'test'
 			when 'usernames' then set 'GET', 'usernames'
 			when 'signin' then set 'POST', 'signin', { email: "user1@mail.com", password: "123456" }
-			when 'signout' then setSecured 'GET', 'signout'
+			when 'signout' then setSecured 'POST', 'signout'
 			when 'signup' then set 'POST', 'signup', { email: "user4@mail.com", password: "123456", user: { name: "User 4" } }
 			
 			when 'account' then setSecured 'GET', 'account'
@@ -121,7 +121,7 @@ define ['jquery', 'bootstrap'], ($, bootstrap) ->
 				$('#signout').button('loading')
 				crossDomain {
 						url: apiUrl + "/signout"
-						method: 'GET'
+						method: 'POST'
 						headers: headers
 						body: ''
 					},
