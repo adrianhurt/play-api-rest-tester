@@ -1,4 +1,4 @@
-define ['jquery', 'bootstrap'], ($, bootstrap) ->
+define ['jquery', 'bootstrap', 'requests'], ($, bootstrap, requests) ->
 	
 	makeRequest = () ->
 		withApiUrl (apiUrl) ->
@@ -59,45 +59,11 @@ define ['jquery', 'bootstrap'], ($, bootstrap) ->
 	
 	
 	setPreparedRequest = (reqName) ->
-		setPreparedReq = (method, req, withToken, body) ->
-			selectMethod(method)
-			$('#request').val(if $('#enveloped').prop('checked') then envelope(req) else req)
-			$('#checkbox-token').prop('checked', withToken)
-			$('#request-body').val(JSON.stringify(body, null, 2))
-		
-		set = (method, req, body = undefined) -> setPreparedReq(method, req, false, body)
-		setSecured = (method, req, body = undefined) -> setPreparedReq(method, req, true, body)
-		
-		switch reqName
-			when 'test' then set 'GET', 'test'
-			when 'usernames' then set 'GET', 'usernames'
-			when 'signin' then set 'POST', 'signin', { email: "user1@mail.com", password: "123456" }
-			when 'signout' then setSecured 'POST', 'signout'
-			when 'signup' then set 'POST', 'signup', { email: "user4@mail.com", password: "123456", user: { name: "User 4" } }
-			
-			when 'account' then setSecured 'GET', 'account'
-			when 'account-update' then setSecured 'PUT', 'account', { name: "New name" }
-			when 'account-update-password' then setSecured 'PUT', 'account/password', { old: "123456", new: "654321" }
-			when 'account-delete' then setSecured 'DELETE', 'account'
-			
-			when 'folders' then setSecured 'GET', 'folders?sort=order&page=1&size=2'
-			when 'folder-new' then setSecured 'POST', 'folders', { name: "New folder" }
-			when 'folder' then setSecured 'GET', 'folders/1'
-			when 'folder-update' then setSecured 'PUT', 'folders/1', { name: "New name" }
-			when 'folder-update-order' then setSecured 'PUT', 'folders/1/order/2'
-			when 'folder-delete' then setSecured 'DELETE', 'folders/1'
-
-			when 'tasks-filtering-sorting' then setSecured 'GET', 'folders/1/tasks?done=false&sort=-deadline,-date,order&page=1'
-			when 'tasks-searching' then setSecured 'GET', 'folders/1/tasks?q=barcelona&page=1'
-			when 'task-new' then setSecured 'POST', 'folders/1/tasks', { text: "New task", deadline: "24-11-2015 18:00:00" }
-			when 'task' then setSecured 'GET', 'tasks/1'
-			when 'task-update' then setSecured 'PUT', 'tasks/1', { text: "New text" }
-			when 'task-update-order' then setSecured 'PUT', 'tasks/1/order/2'
-			when 'task-update-folder' then setSecured 'PUT', 'tasks/1/folder/2'
-			when 'task-update-done' then setSecured 'PUT', 'tasks/1/done'
-			when 'task-update-undone' then setSecured 'DELETE', 'tasks/1/done'
-			when 'task-delete' then setSecured 'DELETE', 'tasks/1'
-	
+		{secured, method, uri, body} = requests.prepared(reqName)
+		selectMethod(method)
+		$('#request').val(if $('#enveloped').prop('checked') then envelope(uri) else uri)
+		$('#checkbox-token').prop('checked', secured)
+		$('#request-body').val(JSON.stringify(body, null, 2))
 	
 	
 	signIn = () ->

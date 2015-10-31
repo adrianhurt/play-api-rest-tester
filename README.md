@@ -12,6 +12,8 @@ It will run it on port 9000 as default. Then run the tester on other port:
 
 Within your browser, go to `http://localhost:8999/` and play with the API.
 
+To customize it and set your own prepared requests for your API calls, you only have to modify the `requests.coffee` file.
+
 And please, don't forget starring this project if you consider it has been useful for you.
 
 
