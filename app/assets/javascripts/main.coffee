@@ -1,13 +1,16 @@
 require.config
 	paths:
-		jquery: "../lib/jquery/jquery"
-		bootstrap: "../lib/bootstrap/js/bootstrap"
+		jquery: '../lib/jquery/jquery'
+		bootstrap: '../lib/bootstrap/js/bootstrap'
+		jsonview: '../lib/jquery-jsonview/jquery.jsonview'
 	
 	shim:
 		jquery:
-			exports: "$"
+			exports: '$'
 		bootstrap:
-			deps: ["jquery"]
+			deps: ['jquery']
+		jsonview:
+			deps: ['jquery']
 
 
-require ["app"]
+require ['app']

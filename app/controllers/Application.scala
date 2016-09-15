@@ -5,6 +5,7 @@ import play.api.mvc._
 import play.api.Play.current
 import play.api.libs.ws._
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -12,8 +13,10 @@ import java.util.Locale
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
+import javax.inject.{ Singleton, Inject }
 
-class Application extends Controller {
+@Singleton
+class Application @Inject() (ws: WSClient) extends Controller {
 
   final val dateTimeFormatter = DateTimeFormat.forPattern("E, dd MMM yyyy HH:mm:ss 'GMT'").withLocale(Locale.ENGLISH).withZoneUTC()
   def dateString: String = dateTimeFormatter.print(new DateTime())
@@ -42,7 +45,7 @@ class Application extends Controller {
     request.body.validate[RequestInfo].fold(
       errors => Future.successful(BadRequest(JsString("Malformed Request Info"))),
       reqInfo => {
-        val holder = WS.url(reqInfo.url).withRequestTimeout(10000).withHeaders(reqInfo.headers.toSeq: _*)
+        val holder = ws.url(reqInfo.url).withRequestTimeout(10 seconds).withHeaders(reqInfo.headers.toSeq: _*)
         val futureResponse = reqInfo.method match {
           case "GET" => holder.get()
           case "POST" => holder.post(reqInfo.body)
@@ -51,19 +54,23 @@ class Application extends Controller {
           case "DELETE" => holder.delete()
         }
         futureResponse.map { implicit response =>
-          val js = if (response.body.length > 0) response.json else JsNull
-          (response.status match {
-            case 200 => if (js == JsNull) Ok else Ok(js)
-            case 201 => if (js == JsNull) Created else Created(js)
-            case 202 => if (js == JsNull) Accepted else Accepted(js)
-            case 204 => NoContent
-            case 400 => BadRequest(js)
-            case 401 => Unauthorized(js)
-            case 403 => Forbidden(js)
-            case 404 => NotFound(js)
-            case s if s > 400 && s < 500 => BadRequest(js)
-            case 500 => InternalServerError(js)
-          }).withHeaders(response.allHeaders.map(h => (h._1, h._2.mkString(","))).toSeq: _*)
+          Ok(Json.obj(
+            "status" -> response.status,
+            "statusText" -> (response.status match {
+              case 200 => "Ok"
+              case 201 => "Created"
+              case 202 => "Accepted"
+              case 204 => "NoContent"
+              case 400 => "BadRequest"
+              case 401 => "Unauthorized"
+              case 403 => "Forbidden"
+              case 404 => "NotFound"
+              case s if s > 400 && s < 500 => "BadRequest"
+              case 500 => "InternalServerError"
+            }),
+            "headers" -> response.allHeaders.map(h => h._1 + ": " + h._2.mkString(",")).toSeq,
+            "body" -> (if (response.body.length > 0) response.json else JsNull)
+          ))
         } recover {
           case e: Throwable => InternalServerError(JsString("Tester Error: " + e.getMessage()))
           case _ => InternalServerError(JsString("Tester Error: unknown error"))

@@ -1,12 +1,12 @@
-# Play API REST Tester [Play 2.4 - Scala]
+# Play API REST Tester [Play 2.5 - Scala]
 
-This is a companion project to test the example template [Play API REST Template](https://github.com/adrianhurt/play-api-rest-seed).
+This is a companion project to test the example template [Play API REST Template](https://github.com/adrianhurt/play-api-rest-seed). It's ready to test every call of the API and lets you visualize all the data and headers.
 
-Run first the template:
+Run first the API server (port 9000 as default):
 
     [play-api-rest-seed] $ run
 
-It will run it on port 9000 as default. Then run the tester on other port:
+Then run the tester on other port:
 
     [play-api-rest-tester] $ run -Dhttp.port=8999
 
@@ -19,5 +19,7 @@ And please, don't forget starring this project if you consider it has been usefu
 
 Also check my other projects:
 
-* [Play Multidomain Seed [Play 2.4 - Scala]](https://github.com/adrianhurt/play-multidomain-seed)
 * [Play-Bootstrap - Play library for Bootstrap [Scala & Java]](https://adrianhurt.github.io/play-bootstrap)
+* [Play Multidomain Seed [Play 2.5 - Scala]](https://github.com/adrianhurt/play-multidomain-seed)
+* [Play Silhouette Credentials Seed [Play 2.5 - Scala]](https://github.com/adrianhurt/play-silhouette-credentials-seed)
+* [Play Multidomain Auth [Play 2.5 - Scala]](https://github.com/adrianhurt/play-multidomain-auth)

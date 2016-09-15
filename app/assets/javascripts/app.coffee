@@ -1,6 +1,6 @@
-define ['jquery', 'bootstrap', 'requests'], ($, bootstrap, requests) ->
+define ['jquery', 'bootstrap', 'requests', 'jsonview'], ($, bootstrap, requests, jsonview) ->
 	
-	makeRequest = () ->
+	makeRequest = ->
 		withApiUrl (apiUrl) ->
 			request = $('#request').val().replace(/^\//, '')
 			if isEmpty(request)
@@ -12,15 +12,19 @@ define ['jquery', 'bootstrap', 'requests'], ($, bootstrap, requests) ->
 				method = getMethod()
 				
 				data = {
-					url: apiUrl + "/" + request
+					url: apiUrl + '/' + request
 					method: method
 					headers: getHeaders()
 					body: if bodyIsRequired(method) then $('#request-body').val() else ''
 				}
 
-				console.log "\n-----------------------------\nSent Data:"
-				console.log data
-				console.log "-----------------------------\n"
+				console.log '\n-----------------------------\nRequest:   '+data.method + ' - ' + data.url
+				console.log '\t' + (k+': '+v for k, v of data.headers).join('\n\t')
+				if data.body.length > 0
+					try
+						console.log JSON.parse(data.body)
+					catch e
+						console.log e						
 								
 				crossDomain data,
 					(jqXHR) -> showResponse(jqXHR, request),
@@ -28,33 +32,27 @@ define ['jquery', 'bootstrap', 'requests'], ($, bootstrap, requests) ->
 
 
 	showResponse = (jqXHR, request) ->
-		status = jqXHR.status
-		statusText = jqXHR.statusText
-		headers = jqXHR.getAllResponseHeaders()
-		body = if jqXHR.responseJSON != undefined then JSON.stringify(jqXHR.responseJSON, null, 2) else undefined
+		data = jqXHR.responseJSON
+		body = if (Object.prototype.toString.call(data.body) == '[object String]') then '"' + data.body + '"' else data.body
 		
-		withNewLines = (str, newLine) -> str.replace(/[\n\r]+/g, newLine)
-		withSpaces = (str) -> str.replace(/\s/g, '&nbsp;')
-		
-		console.log "\n-----------------------------"
-		console.log "Response (jqXHR):"
-		console.log jqXHR
-		console.log "Status: #{status} #{statusText}"
-		console.log "Headers:"
-		console.log "\t" + withNewLines(headers, '\n\t')
-		console.log "Body:"
+		console.log "\nResponse: #{data.status} #{data.statusText}"
+		console.log '\t' + data.headers.join('\n\t')
 		console.log body
-		console.log "-----------------------------\n"
-		$('#response-status').removeClass('success error').addClass(if status < 400 then 'success' else 'error')
-		$('#response-status-code').text(status)
-		$('#response-status-text').text(statusText)
-		$('#response-headers').html(withNewLines(headers, '<br>'))
-		$('#response-body').html(if body != undefined then withSpaces(withNewLines(body, '<br>')) else '')
+		console.log '-----------------------------\n\n\n'
+		
+		$('#response-status').removeClass('success error').addClass(if data.status < 400 then 'success' else 'error')
+		$('#response-status-code').text(data.status)
+		$('#response-status-text').text(data.statusText)
+		$('#response-headers').html(data.headers.join('<br>'))
+		if body != undefined
+			showJsonView $('#response-body'), body
+		else
+			$('#response-body').html('')		
 		$('.response-empty, .response-loading').addClass('hidden')
 		$('.response').removeClass('hidden')
 		
 		switch request
-			when 'signin' then storeToken(jqXHR.responseJSON.token)
+			when 'signin' then storeToken(body.token)
 			when 'signout' then removeToken()
 	
 	
@@ -66,27 +64,27 @@ define ['jquery', 'bootstrap', 'requests'], ($, bootstrap, requests) ->
 		$('#request-body').val(JSON.stringify(body, null, 2))
 	
 	
-	signIn = () ->
+	signIn = ->
 		withApiUrl (apiUrl) ->
 			$('#signin').button('loading')
 			crossDomain {
-					url: apiUrl + "/signin"
+					url: apiUrl + '/signin'
 					method: 'POST'
 					headers: getDefaultHeaders()
-					body: JSON.stringify({ email: "user1@mail.com", password: "123456" })
+					body: JSON.stringify({ email: 'user1@mail.com', password: '123456' })
 				},
-				(jqXHR) -> storeToken(jqXHR.responseJSON.token),
+				(jqXHR) -> storeToken(jqXHR.responseJSON.body.token),
 				(jqXHR) -> console.log jqXHR ; alert('Error while trying to sign in'),
 				(jqXHR) -> $('#signin').button('reset')
 	
-	signOut = () ->
+	signOut = ->
 		withApiUrl (apiUrl) ->
 			headers = getDefaultHeaders(true)
 			tokenHeader = headers['X-Auth-Token']
 			if tokenHeader != undefined and tokenHeader.length > 0
 				$('#signout').button('loading')
 				crossDomain {
-						url: apiUrl + "/signout"
+						url: apiUrl + '/signout'
 						method: 'POST'
 						headers: headers
 						body: ''
@@ -112,7 +110,7 @@ define ['jquery', 'bootstrap', 'requests'], ($, bootstrap, requests) ->
 		else
 			$('#request-body-section').addClass('hidden')
 	
-	getMethod = () ->
+	getMethod = ->
 		$('#method-selector label.active').attr('method')
 	
 	envelopeRequest = (envelopeOrNot) ->
@@ -139,7 +137,7 @@ define ['jquery', 'bootstrap', 'requests'], ($, bootstrap, requests) ->
 				headers[key] = value
 		headers
 	
-	getHeaders = () ->
+	getHeaders = ->
 		headers = {}
 		for tr in $('#request-headers tr')
 			if $(tr).find('input[type=checkbox]').prop('checked')
@@ -151,7 +149,7 @@ define ['jquery', 'bootstrap', 'requests'], ($, bootstrap, requests) ->
 		$.ajax {
 			url: '/proxy'
 			method: 'POST'
-			contentType: "application/json"
+			contentType: 'application/json'
 			data: JSON.stringify(data)
 		}
 		.done (data, textStatus, jqXHR) -> doneFunc(jqXHR) ; alwaysFunc(jqXHR)
@@ -161,9 +159,13 @@ define ['jquery', 'bootstrap', 'requests'], ($, bootstrap, requests) ->
 		if token? and token.length > 0
 			$('#checkbox-token').prop('checked', true)
 			$('#token').val(token).attr('value', token)
-	removeToken = () ->
+	removeToken = ->
 		$('#checkbox-token').prop('checked', false)
 		$('#token').removeAttr('value')
+	
+	
+	showJsonView = ($el, js) ->
+		$el.JSONView(js, {collapsed: !Array.isArray(js)})
 	
 
 #######################################################
@@ -171,12 +173,12 @@ define ['jquery', 'bootstrap', 'requests'], ($, bootstrap, requests) ->
 
 	$ ->
 		
-		$('#method-selector label[method]').click () -> selectMethod($(this).attr('method'))
-		$('#test-button').click () -> makeRequest()
+		$('#method-selector label[method]').click -> selectMethod($(this).attr('method'))
+		$('#test-button').click -> makeRequest()
 		$('#request').keyup (e) -> if(e.which == 13) then makeRequest()
-		$('#test-list a[req]').click () -> setPreparedRequest($(this).attr('req'))		
-		$('#signin').click () -> signIn()
-		$('#signout').click () -> signOut()
-		$('#enveloped').change () -> envelopeRequest($(this).prop('checked'))
+		$('#test-list a[req]').click -> setPreparedRequest($(this).attr('req'))		
+		$('#signin').click -> signIn()
+		$('#signout').click -> signOut()
+		$('#enveloped').change -> envelopeRequest($(this).prop('checked'))
 		
 		$('[data-toggle="tooltip"]').tooltip()

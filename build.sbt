@@ -4,25 +4,26 @@ version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.7"
 
-libraryDependencies ++= Seq(
-  jdbc,
-  cache,
-  ws,
-  specs2 % Test,
-	"org.webjars" % "jquery" % "2.1.4",
-	"org.webjars" % "bootstrap" % "3.3.5" exclude("org.webjars", "jquery"),
-	"org.webjars" % "requirejs" % "2.1.19"
-)
+scalacOptions ++= Seq("-feature", "-deprecation", "-unchecked", "-language:reflectiveCalls", "-language:postfixOps", "-language:implicitConversions")
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 
-// Play provides two styles of routers, one expects its actions to be injected, the
-// other, legacy style, accesses its actions statically.
-routesGenerator := InjectedRoutesGenerator
-
 pipelineStages := Seq(rjs)
+
 RjsKeys.mainModule := "main"
 
+doc in Compile <<= target.map(_ / "none")
+
 scalariformSettings
+
+libraryDependencies ++= Seq(
+  cache,
+  ws,
+  specs2 % Test,
+  "org.webjars" % "jquery" % "3.1.0",
+  "org.webjars" % "bootstrap" % "3.3.7-1" exclude("org.webjars", "jquery"),
+  "org.webjars" % "requirejs" % "2.3.1",
+	"org.webjars" % "jquery-jsonview" % "1.2.2" exclude("org.webjars", "jquery")
+)
